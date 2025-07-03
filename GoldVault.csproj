@@ -1,29 +1,19 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <!-- target .NET 7 -->
     <TargetFramework>net7.0</TargetFramework>
     <AssemblyName>GoldVault</AssemblyName>
-    <OutputPath>bin\Release\net7.0\</OutputPath>
+
+    <!-- point ModBuildConfig at your game install -->
+    <GamePath>E:\SteamLibrary\steamapps\common\Stardew Valley</GamePath>
+
+    <!-- (optional) zip your release build -->
+    <EnableModZip>true</EnableModZip>
+    <ModFolderName>GoldVault</ModFolderName>
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- game EXE for menus+SpriteText (you must commit this file into lib/) -->
-    <Reference Include="StardewValley">
-      <HintPath>lib\Stardew Valley.exe</HintPath>
-    </Reference>
-
-    <!-- SMAPI core -->
-    <Reference Include="StardewModdingAPI">
-      <HintPath>lib\StardewModdingAPI.dll</HintPath>
-    </Reference>
-
-    <!-- toolkit interfaces for IManifest, etc -->
-    <Reference Include="SMAPI.Toolkit.CoreInterfaces">
-      <HintPath>lib\SMAPI.Toolkit.CoreInterfaces.dll</HintPath>
-    </Reference>
-
-    <!-- MonoGame for SpriteBatch, Texture2D, etc -->
-    <Reference Include="MonoGame.Framework">
-      <HintPath>lib\MonoGame.Framework.dll</HintPath>
-    </Reference>
+    <!-- automatically reference SMAPI, game code (SpriteText), MonoGame, etc. -->
+    <PackageReference Include="Pathoschild.Stardew.ModBuildConfig" Version="4.4.0" />
   </ItemGroup>
 </Project>
