@@ -2,10 +2,10 @@ using StardewModdingAPI;
 
 namespace GoldVault
 {
-    /// <summary>Persisted settings for GoldVault.</summary>
+    /// <summary>Configuration settings persisted to config.json.</summary>
     public class ModConfig
     {
-        /// <summary>Key to open the vault menu.</summary>
-        public SButton Hotkey { get; set; } = SButton.F5;
+        /// <summary>The key to open the vault menu.</summary>
+        public SButton OpenMenuKey { get; set; } = SButton.F5;
     }
 }
