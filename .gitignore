@@ -1,0 +1,6 @@
+# VS and build
+bin/
+obj/
+
+# macOS
+.DS_Store
