@@ -3,7 +3,7 @@ A Stardew Valley mod that adds a menu to deposit and withdraw gold on the fly.
 
 # Installation 
 1. Install [SMAPI](https://smapi.io/).
-2. Download the latest release of GoldVault from [here]
+2. Download the latest release of GoldVault from `here`.
 3. Extract the contents of the downloaded zip file into your Stardew Valley `Mods` folder.
 
 # Usage
