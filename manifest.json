@@ -1,0 +1,9 @@
+{
+  "Name": "GoldVault",
+  "Author": "ItsAlonPlayz",
+  "Version": "1.0.0",
+  "Description": "A Stardew Valley mod that adds a menu to deposit and withdraw gold on the fly.",
+  "UniqueID": "ItsAlonPlayz.GoldVault",
+  "EntryDll": "GoldVault.dll",
+  "MinimumApiVersion": "3.0.0"
+}

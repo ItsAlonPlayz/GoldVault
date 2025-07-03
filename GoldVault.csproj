@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <!-- target .NET 7 -->
+    <TargetFramework>net7.0</TargetFramework>
+    <AssemblyName>GoldVault</AssemblyName>
+
+    <!-- point ModBuildConfig at your game install -->
+    <GamePath>E:\SteamLibrary\steamapps\common\Stardew Valley</GamePath>
+
+    <!-- (optional) zip your release build -->
+    <EnableModZip>true</EnableModZip>
+    <ModFolderName>GoldVault</ModFolderName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- automatically reference SMAPI, game code (SpriteText), MonoGame, etc. -->
+    <PackageReference Include="Pathoschild.Stardew.ModBuildConfig" Version="4.4.0" />
+  </ItemGroup>
+</Project>
