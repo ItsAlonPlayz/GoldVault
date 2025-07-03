@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # GoldVault
 A Stardew Valley mod that adds a menu to deposit and withdraw gold on the fly.
 
@@ -8,5 +7,4 @@ A Stardew Valley mod that adds a menu to deposit and withdraw gold on the fly.
 3. Extract the contents of the downloaded zip file into your Stardew Valley `Mods` folder.
 
 # Usage
-Launch Stardew Valley with SMAPI. You can access the GoldVault menu by pressing the `F5` key in-game. (configurable in GMCM and config.json)
-=======
+1. Launch Stardew Valley with SMAPI. You can access the GoldVault menu by pressing the `F5` key in-game. (configurable in GMCM and config.json)
