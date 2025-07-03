@@ -68,17 +68,6 @@ public VaultMenu()
 { }
 
 
-public override void draw(SpriteBatch b)
-{
-    base.draw(b);
-
-    // draw our header text using the game's small font
-    string header = "💰 Gold Vault 💰";
-    var pos = new Vector2(xPositionOnScreen + 20, yPositionOnScreen + 20);
-    b.DrawString(Game1.smallFont, header, pos, Color.Gold);
-
-    drawMouse(b);
-}
 
     }
 

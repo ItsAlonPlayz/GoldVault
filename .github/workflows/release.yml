@@ -1,0 +1,70 @@
+name: Build and Release Mod
+
+on:
+  push:
+    # fires on any pushed tag like "v1.0.0"
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write   # so we can create/update releases
+
+jobs:
+  release:
+    runs-on: windows-latest
+
+    steps:
+      # 1) Checkout the repo
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # 2) Set up .NET 7
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '7.0.x'
+
+      # 3) Clean, restore & build your mod
+      - name: Restore & Build
+        shell: pwsh
+        run: |
+          dotnet clean
+          dotnet restore
+          dotnet build --configuration Release
+
+      # 4) Package the mod ZIP
+      - name: Package mod ZIP
+        shell: pwsh
+        run: |
+          $modName = 'GoldVault'
+          $binDir  = "$env:GITHUB_WORKSPACE\bin\Release\net7.0"
+          $zipPath = "$env:GITHUB_WORKSPACE\${modName}.zip"
+
+          # ensure output directory exists
+          New-Item -ItemType Directory -Path $binDir -Force
+
+          # copy support files alongside the DLL
+          Copy-Item `
+            "$env:GITHUB_WORKSPACE\manifest.json", `
+            "$env:GITHUB_WORKSPACE\config.json", `
+            "$env:GITHUB_WORKSPACE\README.md", `
+            "$env:GITHUB_WORKSPACE\LICENSE.txt" `
+            -Destination $binDir -Force
+
+          # zip everything in the release folder
+          Compress-Archive -Path "$binDir\*" -DestinationPath $zipPath -Force
+
+      # 5) Create or update the GitHub Release and upload assets
+      - name: Create/Update GitHub Release
+        id: gh_release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}      # e.g. "v1.0.0"
+          name: ${{ github.ref_name }}          # release title
+          draft: false                          # publish immediately
+          prerelease: false
+          files: |
+            bin/Release/net7.0/GoldVault.dll
+            GoldVault.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
