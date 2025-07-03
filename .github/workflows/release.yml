@@ -1,67 +1,87 @@
-name: Build and Release Mod
+# .github/workflows/release.yml
+name: Build & Release Mod
 
 on:
   push:
-    # fires on any pushed tag like "v1.0.0"
+    branches:
+      - main
     tags:
       - 'v*'
 
 permissions:
-  contents: write   # so we can create/update releases
+  contents: write  # needed to create/update releases
 
 jobs:
-  release:
+  build:
+    name: Build (all pushes)
     runs-on: windows-latest
-
+    # run this job for pushes to main or to any v* tag
     steps:
-      # 1) Checkout the repo
-      - name: Checkout
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      # 2) Set up .NET 7
-      - name: Setup .NET
+      - name: Setup .NET 7
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '7.0.x'
 
-      # 3) Clean, restore & build your mod
-      - name: Restore & Build
-        shell: pwsh
+      - name: Restore & build
         run: |
           dotnet clean
           dotnet restore
           dotnet build --configuration Release
-
-      # 4) Package the mod ZIP
-      - name: Package mod ZIP
         shell: pwsh
+
+  release:
+    name: Publish Release (tags only)
+    runs-on: windows-latest
+    needs: build
+    # only run this job when the ref is a tag (i.e. refs/tags/v*)
+    if: startsWith(github.ref, 'refs/tags/v')
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 7
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '7.0.x'
+
+      - name: Restore & build
+        run: |
+          dotnet clean
+          dotnet restore
+          dotnet build --configuration Release
+        shell: pwsh
+
+      - name: Package mod ZIP
         run: |
           $modName = 'GoldVault'
-          $binDir  = "$env:GITHUB_WORKSPACE\bin\Release\net7.0"
-          $zipPath = "$env:GITHUB_WORKSPACE\${modName}.zip"
+          $bin    = "$env:GITHUB_WORKSPACE\bin\Release\net7.0"
+          $zip    = "$env:GITHUB_WORKSPACE\${modName}.zip"
 
-          # ensure output directory exists
-          New-Item -ItemType Directory -Path $binDir -Force
+          # ensure output exists
+          New-Item -ItemType Directory -Path $bin -Force
 
-          # copy support files alongside the DLL
+          # copy manifest, config, docs, license alongside the DLL
           Copy-Item `
             "$env:GITHUB_WORKSPACE\manifest.json", `
             "$env:GITHUB_WORKSPACE\config.json", `
             "$env:GITHUB_WORKSPACE\README.md", `
             "$env:GITHUB_WORKSPACE\LICENSE.txt" `
-            -Destination $binDir -Force
+            -Destination $bin -Force
 
-          # zip everything in the release folder
-          Compress-Archive -Path "$binDir\*" -DestinationPath $zipPath -Force
+          # zip everything for release
+          Compress-Archive -Path "$bin\*" -DestinationPath $zip -Force
+        shell: pwsh
 
-      # 5) Create or update the GitHub Release and upload assets
-      - name: Create/Update GitHub Release
+      - name: Create or update GitHub Release
         id: gh_release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.ref_name }}      # e.g. "v1.0.0"
-          name: ${{ github.ref_name }}          # release title
-          draft: false                          # publish immediately
+          tag_name:   ${{ github.ref_name }}  # e.g. "v1.0.0"
+          name:       ${{ github.ref_name }}  # release title
+          draft:      false
           prerelease: false
           files: |
             bin/Release/net7.0/GoldVault.dll
