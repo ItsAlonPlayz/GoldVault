@@ -8,7 +8,7 @@ using StardewValley.Menus;
 
 namespace GoldVault
 {
-    /// <summary>The mod’s entry point.</summary>
+    /// <summary>The main entry point for the Gold Vault mod.</summary>
     public class ModEntry : Mod
     {
         private ModConfig Config;
@@ -16,24 +16,24 @@ namespace GoldVault
         /// <summary>Called once when SMAPI loads your mod.</summary>
         public override void Entry(IModHelper helper)
         {
-            // 1) load or create the config
+            // Load (or create) your config.json
             Config = helper.ReadConfig<ModConfig>();
 
-            // 2) hook input and game-launched
+            // Hook input and post-launch events
             helper.Events.Input.ButtonPressed += OnButtonPressed;
-            helper.Events.GameLoop.GameLaunched += OnGameLaunched;
+            helper.Events.GameLoop.GameLaunched  += OnGameLaunched;
         }
 
-        /// <summary>Register with GMCM after all mods are loaded.</summary>
+        /// <summary>Register with Generic Mod Config Menu (GMCM) after all mods load.</summary>
         private void OnGameLaunched(object sender, GameLaunchedEventArgs e)
         {
             var gmcm = Helper.ModRegistry.GetApi<IGenericModConfigMenuApi>(
                 "spacechase0.GenericModConfigMenu"
             );
             if (gmcm == null)
-                return; // no GMCM installed
+                return; // GMCM not installed
 
-            // register reset/save
+            // Tell GMCM how to reset and save your config
             gmcm.Register(
                 mod: ModManifest,
                 reset: () => Config = new ModConfig(),
@@ -41,7 +41,7 @@ namespace GoldVault
                 titleScreenOnly: false
             );
 
-            // let the user rebind the open-menu key
+            // Expose the OpenMenuKey binding
             gmcm.AddKeybindOption(
                 mod: ModManifest,
                 name:    () => "Open Vault Hotkey",
@@ -51,59 +51,73 @@ namespace GoldVault
             );
         }
 
-        /// <summary>Open the menu when the user presses the bound key.</summary>
+        /// <summary>Open the vault menu when the user presses the configured key.</summary>
         private void OnButtonPressed(object sender, ButtonPressedEventArgs e)
         {
             if (!Context.IsWorldReady)
-                return;
-
+                return; // no save loaded
             if (e.Button == Config.OpenMenuKey)
                 Game1.activeClickableMenu = new VaultMenu();
         }
     }
 
-    /// <summary>A simple vault menu stub.</summary>
+    /// <summary>A simple placeholder vault menu.</summary>
     public class VaultMenu : IClickableMenu
     {
-        private const int WIDTH = 400;
-        private const int HEIGHT = 300;
-        private const int PADDING = 16;
+        private const int Width  = 800;
+        private const int Height = 600;
+        private readonly Texture2D Pixel;
 
         public VaultMenu()
           : base(
-              x: Game1.viewport.Width / 2 - WIDTH / 2,
-              y: Game1.viewport.Height / 2 - HEIGHT / 2,
-              width: WIDTH,
-              height: HEIGHT,
+              x: (Game1.viewport.Width  - Width ) / 2,
+              y: (Game1.viewport.Height - Height) / 2,
+              width:  Width,
+              height: Height,
               showUpperRightCloseButton: true
             )
-        { }
+        {
+            // white-pixel texture used for solid fills
+            Pixel = Game1.content.Load<Texture2D>("LooseSprites\\whitePixel");
+        }
 
         public override void draw(SpriteBatch b)
         {
-            // draw the standard dialog box background
-            Game1.drawDialogueBox(xPositionOnScreen, yPositionOnScreen, width, height, speaker: false, drawOnlyBox: true);
+            // background panel (semi-transparent)
+            b.Draw(Pixel, new Rectangle(xPositionOnScreen, yPositionOnScreen, width, height),
+                   Color.Black * 0.75f);
 
-            // draw the header
-            string header = "💰 Gold Vault 💰";
-            var pos = new Vector2(xPositionOnScreen + PADDING, yPositionOnScreen + PADDING);
-            b.DrawString(Game1.dialogueFont, header, pos, Color.Gold);
+            // header bar
+            var headerRect = new Rectangle(xPositionOnScreen, yPositionOnScreen, width, 56);
+            b.Draw(Pixel, headerRect, Color.Gold * 0.5f);
 
-            // draw the close button and the cursor
+            // header text, centered
+            string title = "★ Gold Vault ★";
+            Vector2 size = Game1.dialogueFont.MeasureString(title);
+            Vector2 pos  = new Vector2(
+                xPositionOnScreen + (width - size.X)  / 2,
+                yPositionOnScreen + (56    - size.Y)  / 2
+            );
+            b.DrawString(Game1.dialogueFont, title, pos, Color.Yellow);
+
+            // draw close button and mouse cursor
             base.drawMouse(b);
         }
 
         public override void receiveLeftClick(int x, int y, bool playSound = true)
         {
-            if (this.readyToClose())
+            if (readyToClose())
             {
                 exitThisMenu();
                 if (playSound) Game1.playSound("bigDeSelect");
             }
         }
+
+        public override void performHoverAction(int x, int y) { }
+        public override void receiveRightClick(int x, int y, bool playSound = true) { }
     }
 
-    /// <summary>Minimal GMCM API subset for keybinds.</summary>
+    /// <summary>Minimal interface for GMCM keybind options.</summary>
     public interface IGenericModConfigMenuApi
     {
         void Register(IManifest mod, Action reset, Action save, bool titleScreenOnly);
